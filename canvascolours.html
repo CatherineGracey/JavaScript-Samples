@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html>
+<!--
+This code combines the HTML canvas element with JavaScript classes.
+When running the page will be filled with moving dots. As they reach the edge of the canvas they change colour. Those that are not red continue moving either left or right across the screen. Those that are red move in a random pattern.
+-->
+	<head>
+		<style>
+			body{
+				background-color: #ccc;
+				margin: 0;
+			}
+
+			canvas {
+				height: 100%;
+				width: 100%;
+			}
+		</style>
+		<title>Experiment with Canvas & JavaScript Classes</title>
+	</head>
+	
+	<body>
+		<canvas></canvas>
+		<script>
+			var canvas = document.getElementsByTagName("canvas")[0];
+			var ctx = canvas.getContext("2d");
+			function resize() {//Resize canvas to fill window.
+				canvas.height = window.innerHeight;
+				canvas.width = window.innerWidth;
+				step();
+			}
+
+			//Constructor functions
+			
+			var colorChoices = ["white", "aliceblue", "antiquewhite", "azure", "beige", "cornsilk", "floralwhite", "ghostwhite", "#ccc", "red"];
+			function Spot(x, y) {//Create spots.
+				this.x = x;
+				this.y = y;
+				this.color = "white";
+				this.moveLeft = false;
+			}
+
+			Spot.prototype.update = function() {//Set spot colour & behaviour.
+				if (this.color === "red") {//Random squiggle behaviour.
+					this.x = this.x+((Math.random()*8)-4);
+					this.y = this.y+((Math.random()*8)-4);
+				} else {//Predictable left/right behaviour.
+					if (this.moveLeft === true){
+						this.x += 1;
+					} else {
+						this.x -=1;
+					}
+				}
+				if (this.x > window.innerWidth || this.x < 0 || this.y > window.innerHeight || this.y < 0) {//Spot has hit the edge of the canvas.
+					this.y = Math.random() * window.innerHeight;//Set new vertical location.
+					this.color = colorChoices[Math.floor(Math.random() * colorChoices.length)];//Set colour.
+					if (this.color === "red") {//Set new horizontal location.
+						this.x = Math.random() * window.innerWidth;
+					} else {//Randomise moving left or moving right.
+						if (Math.random() > 0.5){
+							this.moveLeft = true;
+							this.x = 1;
+						} else {
+							this.moveLeft = false;
+							this.x = window.innerWidth - 1;
+						}
+					}
+				}
+			};
+			
+			Spot.prototype.draw = function() {//Draw spots.
+				ctx.fillStyle = this.color;
+				ctx.fillRect(this.x, this.y, 5, 1);
+			};
+			
+			var spots = [];
+			for (var i = 0; i < 1000; i++) {//Fill spots array with 1000 objects.
+				var x = Math.random() * window.innerWidth;
+				var y = Math.random() * window.innerHeight;
+				spots.push(new Spot(x, y));
+			}
+			
+			//Drawing functions.
+			
+			function step() {
+				for (var i = 0; i < spots.length; i++) {
+					spots[i].update();
+				}
+				draw();
+				requestAnimationFrame(step);//Function runs itself when ready instead of using setInterval.
+			}
+			step();
+			
+			function draw() {
+				//ctx.clearRect(0, 0, canvas.width, canvas.height); //Turned off clear to leave streak effect on the page.
+				ctx.globalAlpha = 0.3;
+				for (var i = 0; i < spots.length; i++) {
+					spots[i].draw();
+				}
+			}
+		
+		resize();//Set canvas to fill window.
+		window.onresize = resize;
+		</script>
+	</body>
+</html>
