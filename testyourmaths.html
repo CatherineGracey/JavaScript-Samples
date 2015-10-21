@@ -1,0 +1,75 @@
+<html>
+<head>
+</head>
+<body>
+	<h1>Test Yourself</h1>
+	<ul>
+		<li id="addition">Addition</li>
+		<li id="subtraction">Subtraction</li>
+		<li id="multiplication">Multiplication</li>
+		<li id="division">Division</li>
+	</ul>
+	<section id="workspace">
+	</section>
+	<script>
+		var options = ["addition", "subtraction", "multiplication", "division"];
+		var score = 0;
+		var currentStreak = 0;
+		function addListener(location, eventType, callFunction, parameters){
+			var func = window;
+			var parts = callFunction.split('.');
+			for (var i = 0; i < parts.length; i++){
+				if (func[parts[i]]){
+					func = func[parts[i]];
+				} else {
+					console.error("Trying to attach a listener to a function that does not exist. Cannot find " + callFunction + ".");
+					break;
+				}
+			}
+			if (typeof func !== "function"){
+				console.error("Trying to attach a listener to something that is not a function (" + callFunction + ").");
+			} else {
+				if (!parameters){
+					document.getElementById(location).addEventListener(eventType, func, true);
+				} else {
+					document.getElementById(location).addEventListener(eventType, function(){func(parameters);}, true);
+				}
+			}
+		}
+		for (var i = 0; i < options.length; i++){
+			addListener(options[i], "click", "loadWorkspace", options[i]);
+		}
+		function loadWorkspace(workspace){
+			var htmlCode = "";
+			htmlCode += '<p>Total score: <span id="score">0</span><br>Streak: <span id="streak">0</span></p>';
+			score = 0;
+			currentStreak = 0;
+			htmlCode += '<div class="numberBox" id="box1"></div>';
+			switch (workspace){
+			case "addition":
+				htmlCode += '<div class="operator"> + </div>';
+				break;
+			case "subtraction":
+				htmlCode += '<div class="operator"> - </div>';
+				break;
+			case "multiplication":
+				htmlCode += '<div class="operator"> &times; </div>';
+				break;
+			case "division":
+				htmlCode += '<div class="operator"> &divide; </div>';
+				break;
+			}
+			htmlCode += '<div class="numberBox" id="box2"></div><div><button id="checkAnswer">Check Answer</button></div>';
+			document.getElementById("workspace").innerHTML = htmlCode;
+			addListener("checkAnswer", "click", "checkAnswer", workspace);
+			nextProblem(workspace);
+		}
+		function nextProblem(workspace){
+			
+		}
+		function checkAnswer(workspace){
+			
+		}
+	</script>
+</body>
+</html>
