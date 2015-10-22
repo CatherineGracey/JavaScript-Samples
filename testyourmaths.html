@@ -73,6 +73,9 @@
 			htmlCode += operator + '</div><div class="numberBox" id="box2"></div><input type="number" id="answer"><button id="checkAnswer">Check Answer</button>';
 			document.getElementById("workspace").innerHTML = htmlCode;
 			addListener("checkAnswer", "click", "checkAnswer", workspace);
+			document.getElementById("answer").addEventListener("keypress", function() {
+					if (event.keyCode == 13) document.getElementById("checkAnswer").click();
+			});
 			nextProblem(workspace);
 		}
 		function nextProblem(workspace){
@@ -124,9 +127,6 @@
 			document.getElementById("box1").innerText = number1;
 			document.getElementById("box2").innerText = number2;
 			userAnswer = document.getElementById("answer").value = null;
-		}
-		function keyPress(){
-			
 		}
 		function checkAnswer(workspace){
 			var userAnswer = document.getElementById("answer").value;
