@@ -1,5 +1,13 @@
 <html>
 <head>
+	<style>
+	.correctAnswer {
+		color: green;
+	}
+	.incorrectAnswer {
+		color: red;
+	}
+	</style>
 </head>
 <body>
 	<h1>Test Yourself</h1>
@@ -13,8 +21,9 @@
 	</section>
 	<script>
 		var options = ["addition", "subtraction", "multiplication", "division"];
-		var score = 0;
-		var currentStreak = 0;
+		var score, count, streak;
+		var number1, number2, currentAnswer;
+		var operator;
 		function addListener(location, eventType, callFunction, parameters){
 			var func = window;
 			var parts = callFunction.split('.');
@@ -41,34 +50,107 @@
 		}
 		function loadWorkspace(workspace){
 			var htmlCode = "";
-			htmlCode += '<p>Total score: <span id="score">0</span><br>Streak: <span id="streak">0</span></p>';
+			htmlCode += '<p>Total score: <span id="score">0</span> of <span id="count">0</span><br>Streak: <span id="streak">0</span></p>';
 			score = 0;
-			currentStreak = 0;
-			htmlCode += '<div class="numberBox" id="box1"></div>';
+			count = 0;
+			streak = 0;
+			htmlCode += '<p id="previousQuestion"></p>';
+			htmlCode += '<div class="numberBox" id="box1"></div><div class="operator">';
 			switch (workspace){
 			case "addition":
-				htmlCode += '<div class="operator"> + </div>';
+				operator = '+';
 				break;
 			case "subtraction":
-				htmlCode += '<div class="operator"> - </div>';
+				operator = '-';
 				break;
 			case "multiplication":
-				htmlCode += '<div class="operator"> &times; </div>';
+				operator = '&times;';
 				break;
 			case "division":
-				htmlCode += '<div class="operator"> &divide; </div>';
+				operator = '&divide;';
 				break;
 			}
-			htmlCode += '<div class="numberBox" id="box2"></div><div><button id="checkAnswer">Check Answer</button></div>';
+			htmlCode += operator + '</div><div class="numberBox" id="box2"></div><input type="number" id="answer"><button id="checkAnswer">Check Answer</button>';
 			document.getElementById("workspace").innerHTML = htmlCode;
 			addListener("checkAnswer", "click", "checkAnswer", workspace);
 			nextProblem(workspace);
 		}
 		function nextProblem(workspace){
+			function randomNumber(range){
+				return Math.floor(Math.random() * range);
+			}
+			switch (workspace){
+			case "addition":
+				if (streak < 10){
+					number1 = randomNumber(10) + 1;
+					number2 = randomNumber(10) + 1;
+				} else {
+					number1 = randomNumber(streak);
+					number2 = randomNumber(streak);
+				}
+				currentAnswer = number1 + number2;
+				break;
+			case "subtraction":
+				if (streak < 10){
+					number2 = randomNumber(10) + 1;
+					number1 = randomNumber(10) + number2;
+				} else {
+					number1 = randomNumber(streak);
+					number2 = randomNumber(streak);
+				}
+				currentAnswer = number1 - number2;
+				break;
+			case "multiplication":
+				if (streak < 10){
+					number1 = randomNumber(10) + 1;
+					number2 = randomNumber(10) + 1;
+				} else {
+					number1 = randomNumber(streak);
+					number2 = randomNumber(streak);
+				}
+				currentAnswer = number1 * number2;
+				break;
+			case "division":
+				if (streak < 10){
+					currentAnswer = randomNumber(10) + 1;
+					number2 = randomNumber(10) + 1;
+				} else {
+					currentAnswer = randomNumber(streak);
+					number2 = randomNumber(streak);
+				}
+				number1 = currentAnswer * number2;
+				break;
+			}
+			document.getElementById("box1").innerText = number1;
+			document.getElementById("box2").innerText = number2;
+			userAnswer = document.getElementById("answer").value = null;
+		}
+		function keyPress(){
 			
 		}
 		function checkAnswer(workspace){
-			
+			var userAnswer = document.getElementById("answer").value;
+			var previousQuestion = document.getElementById("previousQuestion")
+			if (userAnswer){
+				var htmlCode = "The previous question was: " + number1 + " " + operator + " " + number2;
+				htmlCode += '<br>The correct answer is: ' + currentAnswer;
+				htmlCode += '<br>You answered: ' + userAnswer;
+				if (parseFloat(userAnswer) === currentAnswer){
+					htmlCode += '<br>Great work!';
+					score++;
+					streak++;
+					previousQuestion.className = "correctAnswer";
+				} else {
+					streak = 0;
+					previousQuestion.className = "incorrectAnswer";
+				}
+				previousQuestion.innerHTML = htmlCode;
+				count++;
+				document.getElementById("score").innerText = score;
+				document.getElementById("count").innerText = count;
+				document.getElementById("streak").innerText = streak;
+				nextProblem(workspace);
+			}
 		}
 	</script>
 </body>
