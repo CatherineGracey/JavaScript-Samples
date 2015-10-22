@@ -1,6 +1,29 @@
 <html>
 <head>
 	<style>
+	.numberBox {
+		border: 5px solid green;
+    padding: 25px;
+    display: inline-block;
+    margin: auto 2px;
+    min-width: 25px;
+    text-align: center;
+    font-size: 3em;
+	}
+	.numberBox:nth-child(odd){
+    transform: rotate(5deg);
+	}
+	.numberBox:nth-child(even){
+    transform: rotate(-5deg);
+	}
+	#equation {
+	  margin: auto;
+    display: table;
+	}
+	#checkAnswer, #answer {
+		margin: 15px auto 0;
+    display: block;
+	}
 	.correctAnswer {
 		color: green;
 	}
@@ -16,14 +39,15 @@
 		<li id="subtraction">Subtraction</li>
 		<li id="multiplication">Multiplication</li>
 		<li id="division">Division</li>
+		<li id="random">Surprise Me</li>
 	</ul>
 	<section id="workspace">
 	</section>
 	<script>
-		var options = ["addition", "subtraction", "multiplication", "division"];
+		var options = ["addition", "subtraction", "multiplication", "division", "random"];
 		var score, count, streak;
 		var number1, number2, currentAnswer;
-		var operator;
+		var equation;
 		function addListener(location, eventType, callFunction, parameters){
 			var func = window;
 			var parts = callFunction.split('.');
@@ -54,36 +78,29 @@
 			score = 0;
 			count = 0;
 			streak = 0;
-			htmlCode += '<p id="previousQuestion"></p>';
-			htmlCode += '<div class="numberBox" id="box1"></div><div class="operator">';
-			switch (workspace){
-			case "addition":
-				operator = '+';
-				break;
-			case "subtraction":
-				operator = '-';
-				break;
-			case "multiplication":
-				operator = '&times;';
-				break;
-			case "division":
-				operator = '&divide;';
-				break;
-			}
-			htmlCode += operator + '</div><div class="numberBox" id="box2"></div><input type="number" id="answer"><button id="checkAnswer">Check Answer</button>';
+			htmlCode += '<p id="previousQuestion"></p><div id="equation"></div>';
+			htmlCode += '<button id="checkAnswer">Check Answer</button>';
 			document.getElementById("workspace").innerHTML = htmlCode;
 			addListener("checkAnswer", "click", "checkAnswer", workspace);
-			document.getElementById("answer").addEventListener("keypress", function() {
-					if (event.keyCode == 13) document.getElementById("checkAnswer").click();
-			});
 			nextProblem(workspace);
 		}
 		function nextProblem(workspace){
 			function randomNumber(range){
 				return Math.floor(Math.random() * range);
 			}
+			var htmlCode = "";
+			equation = "";
+			var operator;
+			console.log("The argument is " + workspace);
+			if (workspace === "random"){
+				var newOperator = randomNumber((options.length - 1));
+				console.log("The option is now " + newOperator);
+				workspace = options[newOperator];
+			}
+			console.log("The argument is now " + workspace);
 			switch (workspace){
 			case "addition":
+				operator = '+';
 				if (streak < 10){
 					number1 = randomNumber(10) + 1;
 					number2 = randomNumber(10) + 1;
@@ -94,6 +111,7 @@
 				currentAnswer = number1 + number2;
 				break;
 			case "subtraction":
+				operator = '-';
 				if (streak < 10){
 					number2 = randomNumber(10) + 1;
 					number1 = randomNumber(10) + number2;
@@ -104,6 +122,7 @@
 				currentAnswer = number1 - number2;
 				break;
 			case "multiplication":
+				operator = '&times;';
 				if (streak < 10){
 					number1 = randomNumber(10) + 1;
 					number2 = randomNumber(10) + 1;
@@ -114,6 +133,7 @@
 				currentAnswer = number1 * number2;
 				break;
 			case "division":
+				operator = '&divide;';
 				if (streak < 10){
 					currentAnswer = randomNumber(10) + 1;
 					number2 = randomNumber(10) + 1;
@@ -124,19 +144,27 @@
 				number1 = currentAnswer * number2;
 				break;
 			}
-			document.getElementById("box1").innerText = number1;
-			document.getElementById("box2").innerText = number2;
+			htmlCode += '<div class="numberBox">' + number1 + '</div>';
+			htmlCode += '<div class="numberBox">' + operator + '</div>';
+			htmlCode += '<div class="numberBox">' + number2 + '</div>';
+			htmlCode += '<div class="numberBox">=</div>';
+			htmlCode += '<input type="number" id="answer">';
+			equation += number1 + " " + operator + " " + number2;
+			document.getElementById("equation").innerHTML = htmlCode;
+			document.getElementById("answer").addEventListener("keypress", function() {
+					if (event.keyCode == 13) document.getElementById("checkAnswer").click();
+			});
 			userAnswer = document.getElementById("answer").value = null;
 		}
 		function checkAnswer(workspace){
 			var userAnswer = document.getElementById("answer").value;
-			var previousQuestion = document.getElementById("previousQuestion")
+			var previousQuestion = document.getElementById("previousQuestion");
 			if (userAnswer){
-				var htmlCode = "The previous question was: " + number1 + " " + operator + " " + number2;
+				var htmlCode = "The previous question was: " + equation;
 				htmlCode += '<br>The correct answer is: ' + currentAnswer;
 				htmlCode += '<br>You answered: ' + userAnswer;
 				if (parseFloat(userAnswer) === currentAnswer){
-					htmlCode += '<br>Great work!';
+					htmlCode += '. Great work!';
 					score++;
 					streak++;
 					previousQuestion.className = "correctAnswer";
